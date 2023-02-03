@@ -17,12 +17,11 @@ defaults:
 
 env:
   DENO_VERSION: 1.x
-  TEST_SECRET: ${{ secrets.TEST_SECRET }}
-  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 
 jobs:
   push:
     runs-on: ubuntu-latest
+    environment: default
 
     steps:
     - uses: actions/checkout@v3
