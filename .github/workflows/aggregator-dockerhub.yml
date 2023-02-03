@@ -27,5 +27,5 @@ jobs:
     - uses: denoland/setup-deno@v1
       with:
         deno-version: ${{ env.DENO_VERSION }}
-    - run: echo $DOCKERHUB_PASSWORD | docker login --username blswalletghactions --password-stdin
+    - run: docker login --username blswalletghactions --password $DOCKERHUB_PASSWORD
     - run: ./programs/build.ts --image-name voltrevo/bls-wallet-aggregator --image-only --also-tag-latest --push
