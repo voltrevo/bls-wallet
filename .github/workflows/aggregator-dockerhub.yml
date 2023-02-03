@@ -17,8 +17,8 @@ defaults:
 
 env:
   DENO_VERSION: 1.x
-  TEST_SECRET: ${{ env.TEST_SECRET }}
-  DOCKERHUB_PASSWORD: ${{ env.DOCKERHUB_PASSWORD }}
+  TEST_SECRET: ${{ default.TEST_SECRET }}
+  DOCKERHUB_PASSWORD: ${{ default.DOCKERHUB_PASSWORD }}
 
 jobs:
   push:
