@@ -29,5 +29,5 @@ jobs:
       with:
         deno-version: ${{ env.DENO_VERSION }}
     - run: git show HEAD
-    - run: docker login --username blswalletghactions --password ${{ secrets.DOCKERHUB_PASSWORD }}
+    - run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username blswalletghactions --password-stdin
     - run: ./programs/build.ts --image-name voltrevo/bls-wallet-aggregator --image-only --also-tag-latest --push
