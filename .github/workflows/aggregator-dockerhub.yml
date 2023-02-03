@@ -7,7 +7,7 @@ on:
     paths:
       - 'aggregator/**'
       - '.github/workflows/aggregator-dockerhub.yml'
-  pull_request:
+  pull_request: # TODO: Remove (testing gh actions)
     paths:
       - 'aggregator/**'
 
@@ -27,5 +27,5 @@ jobs:
     - uses: denoland/setup-deno@v1
       with:
         deno-version: ${{ env.DENO_VERSION }}
-    - run: docker login --username bls-wallet --password 
-    - run: ./programs/build.ts --image-name bls-wallet/aggregator --image-only --also-tag-latest --push
+    - run: echo $DOCKERHUB_PASSWORD | docker login --username blswalletghactions --password-stdin
+    - run: ./programs/build.ts --image-name voltrevo/bls-wallet-aggregator --image-only --also-tag-latest --push
