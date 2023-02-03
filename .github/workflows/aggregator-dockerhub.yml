@@ -21,7 +21,6 @@ env:
 jobs:
   push:
     runs-on: ubuntu-latest
-    environment: default
 
     steps:
     - uses: actions/checkout@v3
