@@ -15,7 +15,11 @@ await copyTypescriptFiles();
 await buildDockerImage();
 await tarballTypescriptFiles();
 
-console.log("Aggregator build complete");
+if (args["push"]) {
+  await pushDockerImage();
+}
+
+console.log("\nAggregator build complete");
 
 async function allFiles() {
   return [
@@ -29,7 +33,7 @@ async function allFiles() {
   ];
 }
 
-async function BuildName() {
+async function Tag() {
   const commitShort = (await shell.Line("git", "rev-parse", "HEAD")).slice(
     0,
     7,
@@ -85,7 +89,9 @@ async function tarballTypescriptFiles() {
 }
 
 async function buildDockerImage() {
-  const buildName = await BuildName();
+  const tag = await Tag();
+  const imageName = args["image-name"] ?? "aggregator";
+  const imageNameAndTag = `${imageName}:${tag}`;
 
   const sudoDockerArg = args["sudo-docker"] === true ? ["sudo"] : [];
 
@@ -95,18 +101,35 @@ async function buildDockerImage() {
     "build",
     repoDir,
     "-t",
-    `aggregator:${buildName}`,
+    imageNameAndTag,
   );
 
-  const dockerImageName = `aggregator-${buildName}-docker-image`;
+  if (args["also-tag-latest"]) {
+    await shell.run(
+      ...sudoDockerArg,
+      "docker",
+      "tag",
+      `${imageName}:${tag}`,
+      `${imageName}:latest`,
+    );
+  }
+
+  console.log("\nDocker image created:", imageNameAndTag);
+
+  if (args["image-only"]) {
+    return;
+  }
+
+  const dockerImageFileName = `${imageName}-${tag}-docker-image`;
+  const tarFilePath = `${repoDir}/build/${dockerImageFileName}.tar`;
 
   await shell.run(
     ...sudoDockerArg,
     "docker",
     "save",
     "--output",
-    `${repoDir}/build/${dockerImageName}.tar`,
-    `aggregator:${buildName}`,
+    tarFilePath,
+    imageNameAndTag,
   );
 
   if (sudoDockerArg.length > 0) {
@@ -117,12 +140,23 @@ async function buildDockerImage() {
       "sudo",
       "chown",
       username,
-      `${repoDir}/build/${dockerImageName}.tar`,
+      tarFilePath,
     );
   }
 
-  await shell.run(
-    "gzip",
-    `${repoDir}/build/${dockerImageName}.tar`,
-  );
+  await shell.run("gzip", tarFilePath);
+
+  console.log(`Docker image saved: ${tarFilePath}.gz`);
+}
+
+async function pushDockerImage() {
+  const tag = await Tag();
+  const imageName = args["image-name"] ?? "aggregator";
+  const imageNameAndTag = `${imageName}:${tag}`;
+
+  await shell.run("docker", "push", imageNameAndTag);
+
+  if (args["also-tag-latest"]) {
+    await shell.run("docker", "push", `${imageName}:latest`);
+  }
 }
